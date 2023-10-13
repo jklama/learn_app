@@ -1,0 +1,12 @@
+{% extends "bases/layout.html" %}
+
+{% block body %}
+<h1>room</h1>
+    {% for rooms in room %}
+        <div>
+            <span>@{{rooms.host.username}}</span>
+            <h4>{{rooms.id}}-- <a href="{%url 'room' rooms.id %}">{{rooms.name}}</h4>
+        </div>
+    {% endfor %}
+
+{% endblock body %}
