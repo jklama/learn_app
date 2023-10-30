@@ -1,19 +1,24 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Room
+from .models import Room, Topic
 from .forms import RoomForm
 # Create your views here.
 
-def home(request):
-    rooms = Room.objects.all()
-    context = {"rooms": rooms}
-    return render(request, 'bases/home.html',context)
 
-def room(request,pk):
-    
+def home(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    rooms = Room.objects.filter(topic__name__icontains=q)
+    topic = Topic.objects.all()
+    context = {"rooms": rooms, "Topic": topic}
+    return render(request, 'bases/home.html', context)
+
+
+def room(request, pk):
+
     room = Room.objects.get(id=pk)
     context = {'room': room}
-    return render(request,'bases/room.html')
+    return render(request, 'bases/room.html')
+
 
 def create_form(request):
     form = RoomForm()
@@ -23,15 +28,26 @@ def create_form(request):
             form.save()
             return redirect('home')
     context = {"form": form}
-    return render(request, 'bases/room_form.html',context)
+    return render(request, 'bases/room_form.html', context)
 
-def updateRoom(request,pk):
+
+def updateRoom(request, pk):
     room = Room.objects.get(id=pk)
-    form = RoomForm(instance = room)
-    if request.method =="POST":
-        form = RoomForm(request.POST, instance = room)
+    form = RoomForm(instance=room)
+    if request.method == "POST":
+        form = RoomForm(request.POST, instance=room)
         if form.is_valid():
             form.save()
             return redirect('home')
-    context = {'form':form}
-    return render(request,'bases/room_form.html', context)
+    context = {'form': form}
+    return render(request, 'bases/room_form.html', context)
+
+
+def deleteRoom(request, pk):
+    room = Room.objects.get(id=pk)
+    if request.method == 'POST':
+        room.delete()
+        return redirect('home')
+    return render(request, 'bases/delete.html', {
+        'obj': room
+    })
